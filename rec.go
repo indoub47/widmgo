@@ -1,20 +1,19 @@
 package main
 
 import (
-	"database/sql"
 	"time"
 )
 
 type Rec struct {
-	ID          sql.NullInt64 `json:",string"`
+	ID          JsonNullInt64
 	Linija      string
 	Kelias      int64 `json:",string"`
 	Km          int64 `json:",string"`
 	Pk          int64 `json:",string"`
 	M           int64 `json:",string"`
-	Siule       sql.NullInt64
+	Siule       JsonNullInt64
 	Skodas      string
-	Suvirino    string
+	Suvirino    JsonNullString
 	Operatorius string
 	Aparatas    string
 	TData       Time
