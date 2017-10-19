@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/jcelliott/lumber"
@@ -30,6 +29,7 @@ func test(rw http.ResponseWriter, req *http.Request) {
 	// 2. panic
 	if err := decoder.Decode(&recs); err != nil {
 		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusBadRequest)
 		mlog.Error("decoder.Decode() error:", err)
 	}
@@ -45,6 +45,7 @@ func test(rw http.ResponseWriter, req *http.Request) {
 	// jeigu buvo blogų, rašyti atsakymą
 	if len(ves) > 0 {
 		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusBadRequest)
 
 		js, err := json.Marshal(ves)
@@ -56,14 +57,17 @@ func test(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// mėginti sukišti į db
-	c, err := insertRecs(recs)
+	_, err = insertRecs(recs)
 
 	// jeigu nepavyksta sukišti į db
 	// 1. siunčia 500 header
-	// 2. panic
+	// 2. mėgina siųsti error
+	// 3. jeigu error neišsisiunčia - panic
 	if err != nil {
 		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusInternalServerError) // internal error
+		mlog.Fatal("Failed insert\n", err)
 		if err := json.NewEncoder(rw).Encode(err); err != nil {
 			panic(err)
 		}
@@ -73,7 +77,7 @@ func test(rw http.ResponseWriter, req *http.Request) {
 	// 1. siunčia 200 header
 	// 2. log
 	rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	rw.WriteHeader(http.StatusCreated)
-
-	fmt.Println(recs)
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.WriteHeader(http.StatusAccepted)
+	mlog.Info("Inserted:\n", recs)
 }

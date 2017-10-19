@@ -57,179 +57,159 @@ func (r Rec) Validate() ValidatedEntity {
 var (
 	linijos     = []string{"01", "17", "22", "23", "24", "46", "47", "48", "49", "50", "51", "52", "86", "87", "94", "95", "96"}
 	operatoriai = []string{"402", "407", "410", "419", "421", "422", "425", "426", "427", "428", "432", "435", "436", "437"}
-	aparatai    = []string{"806", "807", "830", "807"}
+	aparatai    = []string{"806", "807", "830", "831"}
 	skodai      = []string{"06.3", "06.4"}
 	suvirino    = []string{"IF4", "gamykla", "IF3", "GTC", "ŠP", "VitrasS"}
 )
 
 func validateId(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !isIdValid(r) {
-		ve = ValidationError{"invalid Id", "ValidateId"}
+		return &ValidationError{"invalid Id", "ValidateId"}
 	}
-	return &ve
+	return nil
 }
 
 func validateKelias(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !isKeliasValid(r) {
-		ve = ValidationError{"invalid Kelias", "ValidateKelias"}
+		return &ValidationError{"invalid Kelias", "ValidateKelias"}
 	}
-	return &ve
+	return nil
 }
 
 func validateLinija(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !inSlice(r.Linija, linijos) {
-		ve = ValidationError{"invalid linija", "validateLinija"}
+		return &ValidationError{"invalid linija", "validateLinija"}
 	}
-	return &ve
+	return nil
 }
 
 func validateKm(r *Rec) *ValidationError {
-	var ve ValidationError
 	if r.Km <= 0 {
-		ve = ValidationError{"invalid km", "validateKm"}
+		return &ValidationError{"invalid km", "validateKm"}
 	}
-	return &ve
+	return nil
 }
 
 func validatePk(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !isPkValid(r) {
-		ve = ValidationError{"invalid pk", "validatePk"}
+		return &ValidationError{"invalid pk", "validatePk"}
 	}
-	return &ve
+	return nil
 }
 
 func validateM(r *Rec) *ValidationError {
-	var ve ValidationError
 	if r.M < 1 {
-		ve = ValidationError{"invalid m", "validateM"}
+		return &ValidationError{"invalid m", "validateM"}
 	}
-	return &ve
+	return nil
 }
 
 func validateSiule(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !isSiuleValid(r) {
-		ve = ValidationError{"invalid siūlė", "validateSiule"}
+		return &ValidationError{"invalid siūlė", "validateSiule"}
 	}
-	return &ve
+	return nil
 }
 
 func validateSkodas(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !inSlice(r.Skodas, skodai) {
-		ve = ValidationError{"invalid sąlyginis kodas", "validateSkodas"}
+		return &ValidationError{"invalid sąlyginis kodas", "validateSkodas"}
 	}
-	return &ve
+	return nil
 }
 
 func validateSuvirino(r *Rec) *ValidationError {
 	// gali būti tuščias arba iš leistinų reikšmių
-	var ve ValidationError
 	if !isSuvirinoValid(r) {
-		ve = ValidationError{"invalid suvirinusi įmonė", "validateSuvirino"}
+		return &ValidationError{"invalid suvirinusi įmonė", "validateSuvirino"}
 	}
-	return &ve
+	return nil
 }
 
 func validateOperatorius(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !inSlice(r.Operatorius, operatoriai) {
-		ve = ValidationError{"invalid operatorius", "validateOperatorius"}
+		return &ValidationError{"invalid operatorius", "validateOperatorius"}
 	}
-	return &ve
+	return nil
 }
 
 func validateAparatas(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !inSlice(r.Aparatas, aparatai) {
-		ve = ValidationError{"invalid aparatas", "validateAparatas"}
+		return &ValidationError{"invalid aparatas", "validateAparatas"}
 	}
-	return &ve
+	return nil
 }
 
 func validateTData(r *Rec) *ValidationError {
 	const allowedDays = 15
-	var ve ValidationError
 	// time negali būti ateityje ir negali būti seniau nei prieš allowed days
 	if r.TData.After(time.Now()) || r.TData.Sub(time.Now()).Hours() > allowedDays*24 {
-		ve = ValidationError{"invalid tikrinimo data", "validateTData"}
+		return &ValidationError{"invalid tikrinimo data", "validateTData"}
 	}
-	return &ve
+	return nil
 }
 
 func validateKelintas(r *Rec) *ValidationError {
-	var ve ValidationError
 	if !isKelintasValid(r) {
-		ve = ValidationError{"invalid kelintas", "validateKelintas"}
+		return &ValidationError{"invalid kelintas", "validateKelintas"}
 	}
-	return &ve
+	return nil
 }
 
 // pirmas tikrinimas neturi Id
 func validatePirmasId(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKelintasValid(r) && isIdValid(r) && r.Kelintas == 1 && r.ID.Valid {
-		ve = ValidationError{"pirmasis tikrinimas negali turėti Id", "validatePirmasId"}
+		return &ValidationError{"pirmasis tikrinimas negali turėti Id", "validatePirmasId"}
 	}
-	return &ve
+	return nil
 }
 
 // nepirmas tikrinimas turi Id
 func validateNepirmasId(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKelintasValid(r) && isIdValid(r) && r.Kelintas != 1 && !r.ID.Valid {
-		ve = ValidationError{"nepirmasis tikrinimas turi turėti Id", "validateNepirmasId"}
+		return &ValidationError{"nepirmasis tikrinimas turi turėti Id", "validateNepirmasId"}
 	}
-	return &ve
+	return nil
 }
 
 // pirmas tikrinimas turi suvirino
 func validatePirmasSuvirino(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKelintasValid(r) && isSuvirinoValid(r) && r.Kelintas == 1 && !r.Suvirino.Valid {
-		ve = ValidationError{"pirmam tikrinimui turi būti nurodyta, kas virino", "validatePirmasSuvirino"}
+		return &ValidationError{"pirmam tikrinimui turi būti nurodyta, kas virino", "validatePirmasSuvirino"}
 	}
-	return &ve
+	return nil
 }
 
 // iešme neturi siūlės
 func validateIesmeSiule(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKeliasValid(r) && isSiuleValid(r) && (r.Kelias == 8 || r.Kelias == 9) && r.Siule.Valid {
-		ve = ValidationError{"iešme neturi būti nurodyta siūlė", "validateIesmeSiule"}
+		return &ValidationError{"iešme neturi būti nurodyta siūlė", "validateIesmeSiule"}
 	}
-	return &ve
+	return nil
 }
 
 // neiešme turi būti siūlė
 func validateNeiesmeSiule(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKeliasValid(r) && isSiuleValid(r) && r.Kelias != 8 && r.Kelias != 9 && !r.Siule.Valid {
-		ve = ValidationError{"neiešme turi būti nurodyta siūlė", "validateNeiesmeSiule"}
+		return &ValidationError{"neiešme turi būti nurodyta siūlė", "validateNeiesmeSiule"}
 	}
-	return &ve
+	return nil
 }
 
 // kelias 8 - pk 0
 func validateKelias8Pk(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKeliasValid(r) && isPkValid(r) && r.Kelias == 8 && r.Pk > 0 {
-		ve = ValidationError{"didelės stoties iešme pk turi būti 0", "validateKelias8Pk"}
+		return &ValidationError{"didelės stoties iešme pk turi būti 0", "validateKelias8Pk"}
 	}
-	return &ve
+	return nil
 }
 
 // kelias 8 - pk 0
 func validateKeliasNe8Pk(r *Rec) *ValidationError {
-	var ve ValidationError
 	if isKeliasValid(r) && isPkValid(r) && r.Kelias != 8 && r.Pk == 0 {
-		ve = ValidationError{"pk turi būti > 0", "validateKeliasNe8Pk"}
+		return &ValidationError{"pk turi būti > 0", "validateKeliasNe8Pk"}
 	}
-	return &ve
+	return nil
 }
 
 func isIdValid(r *Rec) bool {

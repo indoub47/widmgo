@@ -35,15 +35,16 @@ func insertRecs(recs []Rec) (int, error) {
 	// try to perform all inserts
 	c := 0
 	err = nil
-	for _, rec := range recs {
+	for _, r := range recs {
 		// creating args slice
-		ps := rec.toSQLArgs()
+		//ps := rec.toSQLArgs()
 
 		// excecuting the statement
-		_, err = tx.Stmt(stmt).Exec(ps)
+		_, err = tx.Stmt(stmt).Exec(r.ID, r.Linija, r.Kelias, r.Km, r.Pk, r.M, r.Siule, r.Skodas, r.Suvirino, r.Operatorius, r.Aparatas, r.TData.Format("2006-01-02"), r.Kelintas, time.Now().Format("2006-01-02T15:04:05"))
 
 		// if not success - rolling back transaction
 		if err != nil {
+			fmt.Println("DB INSERT error", err)
 			fmt.Println("doing rollback")
 			tx.Rollback()
 			return 0, err
@@ -68,10 +69,10 @@ func fetchRecs(sqlWhere string, sqlParamValue int) ([]Rec, error) {
 	}
 
 	// start transaction
-	tx, err := conn.Begin()
-	if err != nil {
-		return nil, err
-	}
+	// tx, err := conn.Begin()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// query
 	sql := "SELECT * FROM recs WHERE sent IS NULL ORDER BY operatorius, kelintas"
