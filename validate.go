@@ -36,6 +36,7 @@ var validators = []func(*Rec) *ValidationError{
 	validateKelintas,
 	validatePirmasId,
 	validateNepirmasId,
+	validatePirmasSuvirino,
 	validateIesmeSiule,
 	validateNeiesmeSiule,
 	validateKelias8Pk,
@@ -126,9 +127,9 @@ func validateSkodas(r *Rec) *ValidationError {
 }
 
 func validateSuvirino(r *Rec) *ValidationError {
-	// gali būti tuščias arba iš leistinų reikšmi
+	// gali būti tuščias arba iš leistinų reikšmių
 	var ve ValidationError
-	if r.Suvirino != "" && !inSlice(r.Suvirino, suvirino) {
+	if !isSuvirinoValid(r) {
 		ve = ValidationError{"invalid suvirinusi įmonė", "validateSuvirino"}
 	}
 	return &ve
@@ -186,6 +187,15 @@ func validateNepirmasId(r *Rec) *ValidationError {
 	return &ve
 }
 
+// pirmas tikrinimas turi suvirino
+func validatePirmasSuvirino(r *Rec) *ValidationError {
+	var ve ValidationError
+	if isKelintasValid(r) && isSuvirinoValid(r) && r.Kelintas == 1 && !r.Suvirino.Valid {
+		ve = ValidationError{"pirmam tikrinimui turi būti nurodyta, kas virino", "validatePirmasSuvirino"}
+	}
+	return &ve
+}
+
 // iešme neturi siūlės
 func validateIesmeSiule(r *Rec) *ValidationError {
 	var ve ValidationError
@@ -223,7 +233,7 @@ func validateKeliasNe8Pk(r *Rec) *ValidationError {
 }
 
 func isIdValid(r *Rec) bool {
-	return !(r.ID.Valid && r.ID.Int64 <= 0)
+	return !r.ID.Valid || r.ID.Int64 > 0
 }
 
 func isKeliasValid(r *Rec) bool {
@@ -235,11 +245,15 @@ func isPkValid(r *Rec) bool {
 }
 
 func isSiuleValid(r *Rec) bool {
-	return !(r.Siule.Valid && r.Siule.Int64 < 0)
+	return !r.Siule.Valid || r.Siule.Int64 >= 0
 }
 
 func isKelintasValid(r *Rec) bool {
 	return r.Kelintas >= 0 && r.Kelintas <= 4
+}
+
+func isSuvirinoValid(r *Rec) bool {
+	return !r.Suvirino.Valid || inSlice(r.Suvirino.String, suvirino)
 }
 
 func inSlice(a string, list []string) bool {
