@@ -7,7 +7,7 @@ import (
 	"github.com/jcelliott/lumber"
 )
 
-func test(rw http.ResponseWriter, req *http.Request) {
+func save(rw http.ResponseWriter, req *http.Request) {
 
 	flog, err := lumber.NewFileLogger("log.log", lumber.TRACE, lumber.ROTATE, 5000, 9, 100)
 	if err != nil {
@@ -25,13 +25,10 @@ func test(rw http.ResponseWriter, req *http.Request) {
 	var recs []Rec
 
 	// jeigu nepavyksta dekodinti json:
-	// 1. siunčia 400 header
-	// 2. panic
 	if err := decoder.Decode(&recs); err != nil {
-		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusBadRequest)
 		mlog.Error("decoder.Decode() error:", err)
+		return
 	}
 
 	// validatinti
@@ -44,40 +41,36 @@ func test(rw http.ResponseWriter, req *http.Request) {
 
 	// jeigu buvo blogų, rašyti atsakymą
 	if len(ves) > 0 {
-		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusBadRequest)
-
 		js, err := json.Marshal(ves)
 		if err != nil {
 			mlog.Error("Rec.Validate() error(s), also unsuccessful marshal", err)
 		} else {
 			mlog.Error("Rec.Validate() error(s):", js)
 		}
+		return
 	}
+
+	// accepted
+	//rw.WriteHeader(http.StatusAccepted)
 
 	// mėginti sukišti į db
 	_, err = insertRecs(recs)
 
 	// jeigu nepavyksta sukišti į db
-	// 1. siunčia 500 header
-	// 2. mėgina siųsti error
-	// 3. jeigu error neišsisiunčia - panic
 	if err != nil {
-		rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusInternalServerError) // internal error
 		mlog.Fatal("Failed insert\n", err)
 		if err := json.NewEncoder(rw).Encode(err); err != nil {
 			panic(err)
 		}
+		return
 	}
 
 	// jeigu pavyko db operacija
-	// 1. siunčia 200 header
-	// 2. log
-	rw.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	rw.WriteHeader(http.StatusAccepted)
+	rw.WriteHeader(http.StatusNoContent)
 	mlog.Info("Inserted:\n", recs)
+}
+
+func receive(rw http.ResponseWriter, req *http.Request) {
 }

@@ -10,7 +10,8 @@ func main() {
 	   	router := mux.NewRouter()
 		   log.Fatal(http.ListenAndServe(":3000", handlers.LoggingHandler(os.Stdout, router))) */
 
-	http.HandleFunc("/test", test)
+	http.HandleFunc("/save", save)
+	http.HandleFunc("/receive", receive)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 
 	/*
