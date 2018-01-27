@@ -73,4 +73,43 @@ func save(rw http.ResponseWriter, req *http.Request) {
 }
 
 func receive(rw http.ResponseWriter, req *http.Request) {
+
+	flog, err := lumber.NewFileLogger("log.log", lumber.TRACE, lumber.ROTATE, 5000, 9, 100)
+	if err != nil {
+		panic(err)
+	}
+	flog.Prefix("handlers.go-test")
+	clog := lumber.NewConsoleLogger(lumber.TRACE)
+	mlog := lumber.NewMultiLogger()
+	mlog.AddLoggers(flog, clog)
+
+	defer mlog.Close()
+	defer req.Body.Close()
+
+	mlog.Info("handlers.receive - before fetching")
+
+	// mėginti partempti iš db
+	recs, err := fetchRecs()
+	if err != nil {
+		mlog.Fatal("Failed fetch", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	mlog.Info("handlers.receive - between fetching and writing response")
+
+	// mėginti išsiųsti
+	if err := json.NewEncoder(rw).Encode(recs); err != nil {
+		mlog.Fatal("Failed encode to response writer", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	mlog.Info("handlers.receive - between writing response and updating db")
+
+	_, err = markAsSent()
+	if err != nil {
+		mlog.Error("Failed to update sent records in DB", err)
+	}
+
 }

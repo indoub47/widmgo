@@ -59,7 +59,7 @@ func insertRecs(recs []Rec) (int, error) {
 	return c, nil
 }
 
-func fetchRecs(sqlWhere string, sqlParamValue int) ([]Rec, error) {
+func fetchRecs() ([]Rec, error) {
 
 	// connect to database
 	conn, err := sql.Open(driverName, dataSourceName)
@@ -75,7 +75,7 @@ func fetchRecs(sqlWhere string, sqlParamValue int) ([]Rec, error) {
 	// }
 
 	// query
-	sql := "SELECT * FROM recs WHERE sent IS NULL ORDER BY operatorius, kelintas"
+	sql := "SELECT id, linija, kelias, km, pk, m, siule, skodas, suvirino, operatorius, aparatas, tdata, kelintas FROM recs WHERE sent IS NULL ORDER BY operatorius, kelintas"
 	rows, err := conn.Query(sql)
 	defer rows.Close()
 
@@ -88,30 +88,39 @@ func fetchRecs(sqlWhere string, sqlParamValue int) ([]Rec, error) {
 
 	for rows.Next() {
 		var rec Rec
-		err = rows.Scan(&rec.ID, &rec.Linija, &rec.Kelias, &rec.Km, &rec.Pk, &rec.M, &rec.Siule, &rec.Skodas, &rec.Suvirino, &rec.Operatorius, &rec.Aparatas, &rec.TData, &rec.Kelintas)
+		err = rows.Scan(&rec.ID, &rec.Linija, &rec.Kelias, &rec.Km, &rec.Pk, &rec.M, &rec.Siule, &rec.Skodas, &rec.Suvirino, &rec.Operatorius, &rec.Aparatas, &rec.TData.Time, &rec.Kelintas)
 		if err != nil {
 			return nil, err
 		}
 		recs = append(recs, rec)
 	}
 
-	// done with rows
-	rows.Close()
+	return recs, nil
+}
+
+func markAsSent() (sql.Result, error) {
+
+	// connect to database
+	conn, err := sql.Open(driverName, dataSourceName)
+	defer conn.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	// prepare update statement
-	sql = "UPDATE recs SET sent = ? WHERE sent IS NULL"
-	stmt, err := conn.Prepare(sql)
+	us := "UPDATE recs SET sent = ? WHERE sent IS NULL"
+	stmt, err := conn.Prepare(us)
 	if err != nil {
 		return nil, err
 	}
 
 	// perform update
-	_, err = stmt.Exec(time.Now())
+	r, err := stmt.Exec(time.Now())
 	if err != nil {
 		return nil, err
 	}
 
-	return recs, nil
+	return r, nil
 }
 
 /*

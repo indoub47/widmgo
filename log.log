@@ -113,3 +113,16 @@
 2017-10-21 21:49:00 handlers.go-test INFO  Inserted:
 %!(EXTRA []main.Rec=[{{{14 true}} 23 1 56 10 23 {{0 true}} 06.4 {{ false}} 426 830 2017-09-15 00:00:00 +0000 UTC 3} {{{0 false}} 17 1 142 10 23 {{9 true}} 06.4 {{gamykla true}} 426 831 2017-09-15 00:00:00 +0000 UTC 1} {{{456 true}} 01 1 333 5 23 {{0 true}} 06.4 {{ false}} 422 831 2017-09-08 00:00:00 +0000 UTC 2}])
 2017-10-21 21:49:00 handlers.go-test *LOG* Closing log now
+2017-10-28 06:57:00 handlers.go-test INFO  handlers.receive - before fetching
+2017-10-28 06:57:00 handlers.go-test FATAL Failed fetch%!(EXTRA *errors.errorString=sql: expected 16 destination arguments in Scan, not 13)
+2017-10-28 06:57:00 handlers.go-test *LOG* Closing log now
+2017-10-28 07:01:34 handlers.go-test INFO  handlers.receive - before fetching
+2017-10-28 07:01:34 handlers.go-test FATAL Failed fetch%!(EXTRA *errors.errorString=sql: Scan error on column index 11: unsupported Scan, storing driver.Value type time.Time into type *main.Time)
+2017-10-28 07:01:34 handlers.go-test *LOG* Closing log now
+2017-10-28 07:04:16 handlers.go-test INFO  handlers.receive - before fetching
+2017-10-28 07:04:16 handlers.go-test FATAL Failed fetch%!(EXTRA *errors.errorString=sql: Scan error on column index 11: unsupported Scan, storing driver.Value type time.Time into type *main.Time)
+2017-10-28 07:04:16 handlers.go-test *LOG* Closing log now
+2017-10-28 07:25:12 handlers.go-test INFO  handlers.receive - before fetching
+2017-10-28 07:25:12 handlers.go-test INFO  handlers.receive - between fetching and writing response
+2017-10-28 07:25:12 handlers.go-test INFO  handlers.receive - between writing response and updating db
+2017-10-28 07:25:12 handlers.go-test *LOG* Closing log now
